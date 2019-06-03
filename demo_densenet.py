@@ -100,8 +100,8 @@ def train_epoch(data_type='train'):
         for idx, (c, p, t, target) in enumerate(data):
             optimizer.zero_grad()
             model.zero_grad()
-            input_var = [Variable(_.float()).cuda(async=True) for _ in [c, p, t]]
-            target_var = Variable(target.float(), requires_grad=False).cuda(async=True)
+            input_var = [Variable(_.float()).cuda() for _ in [c, p, t]]
+            target_var = Variable(target.float(), requires_grad=False).cuda()
 
             pred = model(input_var)
             loss = criterion(pred, target_var)
@@ -112,8 +112,8 @@ def train_epoch(data_type='train'):
         for idx, (c, p, target) in enumerate(data):
             optimizer.zero_grad()
             model.zero_grad()
-            input_var = [Variable(_.float()).cuda(async=True) for _ in [c, p]]
-            target_var = Variable(target.float(), requires_grad=False).cuda(async=True)
+            input_var = [Variable(_.float()).cuda() for _ in [c, p]]
+            target_var = Variable(target.float(), requires_grad=False).cuda()
 
             pred = model(input_var)
             loss = criterion(pred, target_var)
@@ -124,8 +124,8 @@ def train_epoch(data_type='train'):
         for idx, (c, target) in enumerate(data):
             optimizer.zero_grad()
             model.zero_grad()
-            x = [Variable(c.float()).cuda(async=True)]
-            y = Variable(target.float(), requires_grad=False).cuda(async=True)
+            x = [Variable(c.float()).cuda()]
+            y = Variable(target.float(), requires_grad=False).cuda()
 
             pred = model(x)
             loss = criterion(pred, y)
@@ -177,24 +177,24 @@ def predict(test_type='train'):
 
     if (opt.period_size > 0) & (opt.close_size > 0) & (opt.trend_size > 0):
         for idx, (c, p, t, target) in enumerate(data):
-            input_var = [Variable(_.float()).cuda(async=True) for _ in [c, p, t]]
-            target_var = Variable(target.float(), requires_grad=False).cuda(async=True)
+            input_var = [Variable(_.float()).cuda() for _ in [c, p, t]]
+            target_var = Variable(target.float(), requires_grad=False).cuda()
             pred = best_model(input_var)
             predictions.append(pred.data.cpu().numpy())
             ground_truth.append(target.numpy())
             loss.append(criterion(pred, target_var).data[0])
     elif (opt.close_size > 0) & (opt.period_size > 0):
         for idx, (c, p, target) in enumerate(data):
-            input_var = [Variable(_.float()).cuda(async=True) for _ in [c, p]]
-            target_var = Variable(target.float(), requires_grad=False).cuda(async=True)
+            input_var = [Variable(_.float()).cuda() for _ in [c, p]]
+            target_var = Variable(target.float(), requires_grad=False).cuda()
             pred = best_model(input_var)
             predictions.append(pred.data.cpu().numpy())
             ground_truth.append(target.numpy())
             loss.append(criterion(pred, target_var).data[0])
     elif opt.close_size > 0:
         for idx, (c, target) in enumerate(data):
-            input_var = Variable(c.float()).cuda(async=True)
-            target_var = Variable(target.float(), requires_grad=False).cuda(async=True)
+            input_var = Variable(c.float()).cuda()
+            target_var = Variable(target.float(), requires_grad=False).cuda()
             pred = best_model(input_var)
             predictions.append(pred.data.cpu().numpy())
             ground_truth.append(target.numpy())

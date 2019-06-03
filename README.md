@@ -11,3 +11,6 @@ The data can be downloaded at [my web](https://chuanting.github.io/data/data.zip
 The paper can be found at [this link](https://chuanting.github.io/pdf/ieee_cl_2018.pdf).
 
 An executable code can also be found at [codeocean](https://codeocean.com/capsule/3301293/tree/v1).
+
+# Update 2019/06/03
+The code is written by using PyTorch 0.3 and for PyTorch version > 1.0, it can not be executed successfully. I update the code and if there still exists bugs, please email me directly.
