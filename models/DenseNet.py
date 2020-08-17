@@ -78,7 +78,7 @@ class DenseNetUnit(nn.Sequential):
 
             for m in self.modules():
                 if isinstance(m, nn.Conv2d):
-                    nn.init.kaiming_normal(m.weight.data)
+                    nn.init.kaiming_normal_(m.weight.data)
                 elif isinstance(m, nn.BatchNorm2d):
                     m.weight.data.fill_(1)
                     m.bias.data.zero_()
@@ -112,4 +112,4 @@ class DenseNet(nn.Module):
         if self.channels[2] > 0:
             out += self.trend_feature(inputs[2])
 
-        return F.sigmoid(out)
+        return torch.sigmoid(out)

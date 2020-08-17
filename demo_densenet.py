@@ -21,7 +21,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from torch.utils.data.sampler import SubsetRandomSampler
-sys.path.append('../../')
+sys.path.append('../')
 from dataloader.milano import load_data
 from models.DenseNet import DenseNet
 
@@ -55,14 +55,14 @@ parse.add_argument('-test_col', type=int, default=19, help='test col')
 parse.add_argument('-save_dir', type=str, default='../results')
 
 opt = parse.parse_args()
-print(opt)
+# print(opt)
 # opt.save_dir = '{}/{}'.format(opt.save_dir, opt.traffic)
 opt.model_filename = '{}/model={}-loss={}-lr={}-close={}-period=' \
                      '{}-trend={}'.format(opt.save_dir,
                                           'densenet',
                                           opt.loss, opt.lr, opt.close_size,
                                           opt.period_size, opt.trend_size)
-print('Saving to ' + opt.model_filename)
+# print('Saving to ' + opt.model_filename)
 
 
 def log(fname, s):
@@ -105,7 +105,7 @@ def train_epoch(data_type='train'):
 
             pred = model(input_var)
             loss = criterion(pred, target_var)
-            total_loss += loss.data[0]
+            total_loss += loss.item()
             loss.backward()
             optimizer.step()
     elif (opt.close_size > 0) & (opt.period_size > 0):
@@ -117,7 +117,7 @@ def train_epoch(data_type='train'):
 
             pred = model(input_var)
             loss = criterion(pred, target_var)
-            total_loss += loss.data[0]
+            total_loss += loss.item()
             loss.backward()
             optimizer.step()
     elif opt.close_size > 0:
@@ -129,7 +129,7 @@ def train_epoch(data_type='train'):
 
             pred = model(x)
             loss = criterion(pred, y)
-            total_loss += loss.data[0]
+            total_loss += loss.item()
             loss.backward()
             optimizer.step()
 
@@ -243,7 +243,7 @@ def train_valid_split(dataloader, test_size=0.2, shuffle=True, random_seed=0):
 
 
 if __name__ == '__main__':
-    path = '../data/all_data_sliced.h5'
+    path = './data/all_data_sliced.h5'
     x_train, y_train, x_test, y_test, mmn = load_data(path, opt.traffic, opt.close_size, opt.period_size,
                                                       opt.trend_size,
                                                       opt.test_size, opt.nb_flow, opt.height, opt.width, opt.crop,
@@ -256,8 +256,8 @@ if __name__ == '__main__':
 
     # split the training data into train and validation
     train_idx, valid_idx = train_valid_split(train_data, 0.1, shuffle=True)
-    train_sampler = list(SubsetRandomSampler(train_idx))
-    valid_sampler = list(SubsetRandomSampler(valid_idx))
+    train_sampler = SubsetRandomSampler(train_idx)
+    valid_sampler = SubsetRandomSampler(valid_idx)
 
     train_loader = DataLoader(train_data, batch_size=opt.batch_size, sampler=train_sampler,
                               num_workers=8, pin_memory=True)
