@@ -14,3 +14,7 @@ An executable code can also be found at [codeocean](https://codeocean.com/capsul
 
 # Update 2019/06/03
 The code is written by using PyTorch 0.3 and for PyTorch version > 1.0, it can not be executed successfully. I update the code and if there still exists bugs, please email me directly.
+
+
+# Update 2021/04/14
+Two attention schemes are added into the code.
