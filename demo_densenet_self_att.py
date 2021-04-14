@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-/*******************************************
-** This is a file created by ct
-** Name: demo
-** Date: 1/21/18
-** BSD license
-********************************************/
+-----------------------------------------------
+# File: demo_densenet_self_att.py
+# This file is created by Chuanting Zhang
+# Email: chuanting.zhang@kaust.edu.sa
+# Date: 2021-04-13 (YYYY-MM-DD)
+-----------------------------------------------
 """
 
 import os
@@ -24,7 +24,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 
 sys.path.append('../')
 from dataloader.milano import load_data
-from models.DenseNet import DenseNet
+from models.densenet_self_att import DenseNet
 
 torch.manual_seed(22)
 
@@ -59,10 +59,10 @@ opt = parse.parse_args()
 # print(opt)
 # opt.save_dir = '{}/{}'.format(opt.save_dir, opt.traffic)
 opt.model_filename = '{}/model={}-loss={}-lr={}-close={}-period=' \
-                     '{}-trend={}'.format(opt.save_dir,
-                                          'densenet',
-                                          opt.loss, opt.lr, opt.close_size,
-                                          opt.period_size, opt.trend_size)
+                     '{}-trend={}-self-att'.format(opt.save_dir,
+                                                   'densenet',
+                                                   opt.loss, opt.lr, opt.close_size,
+                                                   opt.period_size, opt.trend_size)
 
 
 # print('Saving to ' + opt.model_filename)
@@ -112,6 +112,8 @@ def train_epoch(data_type='train'):
             if data_type == 'train':
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
+
     elif (opt.close_size > 0) & (opt.period_size > 0):
         for idx, (c, p, target) in enumerate(data):
             optimizer.zero_grad()
@@ -125,6 +127,7 @@ def train_epoch(data_type='train'):
             if data_type == 'train':
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
     elif opt.close_size > 0:
         for idx, (c, target) in enumerate(data):
             optimizer.zero_grad()
@@ -138,6 +141,7 @@ def train_epoch(data_type='train'):
             if data_type == 'train':
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
 
     return total_loss
 
@@ -149,7 +153,7 @@ def train():
     for i in range(opt.epoch_size):
         train_loss.append(train_epoch('train'))
         valid_loss.append(train_epoch('valid'))
-        scheduler.step()
+        # scheduler.step()
 
         if valid_loss[-1] < best_valid_loss:
             best_valid_loss = valid_loss[-1]
@@ -274,9 +278,9 @@ if __name__ == '__main__':
                 opt.trend_size * opt.nb_flow]
     model = DenseNet(nb_flows=opt.nb_flow, drop_rate=opt.drop_rate, channels=channels).cuda()
     optimizer = optim.Adam(model.parameters(), opt.lr)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[int(0.5 * opt.epoch_size),
-                                                                      int(0.75 * opt.epoch_size)], gamma=0.1)
-    # optimizer = optim.SGD(model.parameters(), lr=opt.lr, momentum=0.9)
+    # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[int(0.5 * opt.epoch_size),
+    #                                                                   int(0.75 * opt.epoch_size)], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.001, max_lr=0.01, cycle_momentum=False)
     # print(model)
 
     if not os.path.exists(opt.save_dir):

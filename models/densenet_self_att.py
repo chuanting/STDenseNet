@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-/*******************************************
-** This is a file created by ct
-** Name: DenseNet
-** Date: 1/15/18
-** BSD license
-********************************************/
+-----------------------------------------------
+# File: densenet_self_att.py
+# This file is created by Chuanting Zhang
+# Email: chuanting.zhang@kaust.edu.sa
+# Date: 2021-04-13 (YYYY-MM-DD)
+-----------------------------------------------
 """
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from collections import OrderedDict
+from models.attentions import AttentionConv
 
 
 class _DenseLayer(nn.Sequential):
@@ -18,13 +19,13 @@ class _DenseLayer(nn.Sequential):
         super(_DenseLayer, self).__init__()
         self.add_module('norm1', nn.BatchNorm2d(num_input_features))
         self.add_module('relu1', nn.ReLU(inplace=True))
-        self.add_module('conv1', nn.Conv2d(num_input_features, bn_size * growth_rate,
-                                           kernel_size=1, stride=1, bias=False))
+        self.add_module('conv1', AttentionConv(num_input_features, bn_size * growth_rate,
+                                               kernel_size=1, stride=1, bias=False))
         self.add_module('norm2', nn.BatchNorm2d(bn_size * growth_rate))
         self.add_module('relu2', nn.ReLU(inplace=True))
-        self.add_module('conv2', nn.Conv2d(bn_size * growth_rate, growth_rate,
-                                           kernel_size=3, stride=1, padding=1,
-                                           bias=False))
+        self.add_module('conv2', AttentionConv(bn_size * growth_rate, growth_rate,
+                                               kernel_size=3, stride=1, padding=1,
+                                               bias=False))
         self.drop_rate = drop_rate
 
     def forward(self, input):
@@ -43,13 +44,6 @@ class _DenseBlock(nn.Sequential):
                                 bn_size, drop_rate)
             self.add_module('denselayer%d' % (i + 1), layer)
 
-
-# class _FirstLayer(nn.Sequential):
-#     def __init__(self, in_channel, out_channels):
-#         super(_FirstLayer, self).__init__()
-#         self.add_module('conv0', nn.Conv2d(in_channel, out_channels, kernel_size=3, padding=1))
-#         self.add_module('norm0', nn.BatchNorm2d(out_channels))
-#         self.add_module('relu0', nn.ReLU(inplace=True))
 
 class DenseNetUnit(nn.Sequential):
     def __init__(self, channels, nb_flows, layers=5, growth_rate=12,
@@ -73,8 +67,8 @@ class DenseNetUnit(nn.Sequential):
 
             # Final batch norm
             self.features.add_module('normlast', nn.BatchNorm2d(num_features))
-            self.features.add_module('convlast', nn.Conv2d(num_features, nb_flows,
-                                                           kernel_size=1, padding=0, bias=False))
+            self.features.add_module('convlast', AttentionConv(num_features, nb_flows,
+                                                               kernel_size=1, padding=0, bias=False))
 
             for m in self.modules():
                 if isinstance(m, nn.Conv2d):
